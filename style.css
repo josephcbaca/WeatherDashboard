@@ -1,0 +1,11 @@
+.header-custom {
+    font-size: 40px;
+    font-style: bold;
+    background-color: darkgray;
+    color: white;
+}
+
+.search-column {
+    background-color: lightgray;
+}
+
