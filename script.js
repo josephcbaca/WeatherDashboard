@@ -1,76 +1,107 @@
-$(document).ready(function () {
+function searchCity(cityValue) {
 
-    $("#search-button").on("click", function () {
-        let cityValue = $("#city-search").val().trim()
-        searchCity(cityValue)
-    });
+    let APIKey = "080a1e9a91e6a33fe6bb46a959d9a7de";
+    // URL to query the database
+    let queryURL1 = "https://api.openweathermap.org/data/2.5/weather?q=" + cityValue + "&appid=" + APIKey;
 
-    function searchCity(cityValue) {
+    // AJAX calls most data + latitude and longitude for second AJAX call
+    $.ajax({
+        url: queryURL1,
+        method: "GET"
+    }).then(function (response) {
 
+        let latitude = response.coord.lat
+        let longitude = response.coord.lon
 
-        let APIKey = "080a1e9a91e6a33fe6bb46a959d9a7de";
-        // URL to query the database
-        let queryURL1 = "https://api.openweathermap.org/data/2.5/weather?q=" + cityValue + "&appid=" + APIKey;
+        let queryURLLatLon = "https://api.openweathermap.org/data/2.5/onecall?lat=" + latitude + "&lon=" + longitude + "&exclude={part}&appid=" + APIKey;
 
-
-
-        // We then created an AJAX call
+        // Second AJAX to GET UV Index
         $.ajax({
-            url: queryURL1,
+            url: queryURLLatLon,
             method: "GET"
-        }).then(function (response) {
+        }).then(function (response2) {
 
-            let latitude = response.coord.lat
-            let longitude = response.coord.lon
+            new Date($.now());
+            let current = new Date();
+            let day = current.getDate();
+            let month = current.getMonth();
+            let year = current.getFullYear();
 
-            let queryURLLatLon = "https://api.openweathermap.org/data/2.5/onecall?lat=" + latitude + "&lon=" + longitude + "&exclude={part}&appid=" + APIKey;
+            for (let i = 1; i < 6; i++) {
 
-            //second AJAX to GET UV Index
-            $.ajax({
-                url: queryURLLatLon,
-                method: "GET"
-            }).then(function (response2) {
+                let colm = $("<div>");
+                let smallDate = $("<h5>");
+                let smallIcon = $("<img>");
+                let smallTemp = $("<h7>");
+                let smallHumi = $("<h7>");
+                let temp2 = response2.daily[i].temp.day
+                let faren2 = (temp2 - 273.15) * 1.80 + 32;
 
-                new Date($.now());
-                let current = new Date();
-                let day = current.getDate();
-                let month = current.getMonth();
-                let year = current.getFullYear();
+                colm.addClass("card col-md-2 p-1 small-box mr-2");
+                colm.attr("id", "cardSort-" + i);
+                $(".small-row").append(colm);
 
-                for (let i = 0; i < 5; i++) {
+                smallDate.addClass("sDate-" + i);
+                smallDate.text((month + 1) + "/" + (day + i) + "/" + year);
+                $("#cardSort-" + i).append(smallDate);
 
-                    let colm = $("<div>");
-                    let smallDate = $("<h5>");
-                    // let smallIcon = $("#small-icon");
-                    let smallTemp = $("<h7>");
-                    let smallHumi = $("<h7>");
+                smallIcon.addClass("sIcon");
+                smallIcon.attr("src", "http://openweathermap.org/img/wn/" + response2.daily[i].weather[0].icon + "@2x.png");
+                $("#cardSort-" + i).append(smallIcon);
 
-                    colm.addClass("card col-md-2 p-1");
-                    colm.attr("id", "cardSort-" + i);
-                    smallDate.addClass("sDate-" + i);
-                    smallDate.text(day + "/" + month + "/" + year);
-                    smallTemp.addClass("sTemp-" + i);
-                    smallTemp.text("Temp: " + response2.daily[i].temp.day);
-                    smallHumi.addClass("sHumi-" + i);
-                    smallHumi.text("Humidity: " + response2.daily[i].humidity + "%");
-                    
-                    $(".small-row").append(colm);
-                    $("#cardSort-" + i).append(smallDate);
-                    $("#cardSort-" + i).append(smallTemp);
-                    $("#cardSort-" + i).append(smallHumi);
-                };
+                smallTemp.addClass("sTemp-" + i);
+                smallTemp.text("Temp: " + Math.trunc(faren2) + "° F");
+                $("#cardSort-" + i).append(smallTemp);
 
-                // Calculate the temperature (converted from Kelvin)
-                let temp = response.main.temp
-                let f = (temp - 273.15) * 1.80 + 32;
-                $(".tempMain").text("Temperature(Fahrenheit): " + f + " F");
-                $(".windMain").text("Wind Speeds: " + response.wind.speed + " MPH");
-                $(".humidity").text("Humdity: " + response.main.humidity);
-                $(".UVMain").text("UV Index: " + response2.current.uvi)
+                smallHumi.addClass("sHumi-" + i);
+                smallHumi.text("Humidity: " + response2.daily[i].humidity + "%");
+                $("#cardSort-" + i).append(smallHumi);
 
-            });
+            };
 
+            // Calculate the temperature (converted from Kelvin)
+            let temp = response.main.temp
+            let faren = (temp - 273.15) * 1.80 + 32;
+            let cardHead = $("<h5>");
+            let bigIcon = $("<img>");
 
+            cardHead.text(response.name + " " + ((month + 1) + "/" + day + "/" + year));
+            bigIcon.attr("src", "http://openweathermap.org/img/wn/" + response2.daily[0].weather[0].icon + "@2x.png");
+            $(".card-title").append(cardHead);
+            $(".card-title").append(bigIcon);
+
+            $(".tempMain").text("Temperature(Fahrenheit): " + Math.trunc(faren) + "° F");
+            $(".windMain").text("Wind Speeds: " + response.wind.speed + " MPH");
+            $(".humidity").text("Humdity: " + response.main.humidity);
+
+            // If statements to set severity level for UV Index
+            if (response2.current.uvi < 5) {
+                let uvLow = $("<button>");
+                uvLow.addClass("btn btn-success");
+                uvLow.text(response2.current.uvi);
+                $(".UVMain").append(uvLow);
+            }
+            if (response2.current.uvi >= 5 && response2.current.uvi <= 7) {
+                let uvLow = $("<button>");
+                uvLow.addClass("btn btn-warning");
+                uvLow.text(response2.current.uvi);
+                $(".UVMain").append(uvLow);
+            }
+            if (response2.current.uvi > 7) {
+                let uvLow = $("<button>");
+                uvLow.addClass("btn btn-danger");
+                uvLow.text(response2.current.uvi);
+                $(".UVMain").append(uvLow);
+            }
+
+            $("#city-search").empty();
         });
-    };
+    });
+};
+
+$("#search-button").on("click", function (event) {
+    event.preventDefault();
+    let cityValue = $("#city-search").val().trim();
+
+    searchCity(cityValue)
 });
