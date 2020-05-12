@@ -93,15 +93,57 @@ function searchCity(cityValue) {
                 uvLow.text(response2.current.uvi);
                 $(".UVMain").append(uvLow);
             }
+            // Clear input field
+            $("#city-search").val("");
+            // Create city buttons
+            let cityButton = $("<button>")
+            let cityStorage = cityValue.charAt(0).toUpperCase() + cityValue.slice(1)
+            cityButton.addClass("col-md-12 btn btn-light btn-outline-dark");
+            cityButton.text(cityStorage);
+            cityButton.attr("src", "button");
+            $("#cityBtnDiv").append(cityButton);
 
-            $("#city-search").empty();
         });
     });
 };
 
+function generateButton() {
+      var create = $("<button>")
+      create.attr("class", "btn btn-outline-secondary")
+      create.attr("type", "button")
+      create.text(response.name)
+      buttonDiv.prepend(create)
+
+      var cityString = response.name
+      cityButtonArr.push(cityString)
+
+      localStorage.setItem("cityStorage", JSON.stringify(cityButtonArr))
+      console.log(cityButtonArr)
+}
+
+function loadData() {
+
+    let loadData = localStorage.getItem("city")
+    if (loadData == null || loadData == "") return;
+
+    let cityButtonArr = JSON.parse(loadData)
+
+    for (i = 0; i < cityButtonArr.length; i++) {
+        let create = $("<button>")
+        create.addClass("btn btn-outline-secondary")
+        create.attr("type", "button")
+        create.text(cityButtonArr[i])
+        buttonDiv.prepend(create)
+    }
+}
+
+//for loop to create setItem value 
 $("#search-button").on("click", function (event) {
     event.preventDefault();
     let cityValue = $("#city-search").val().trim();
 
+    localStorage.setItem("city1", cityValue)
     searchCity(cityValue)
+
 });
+
