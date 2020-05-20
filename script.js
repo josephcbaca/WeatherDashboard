@@ -1,6 +1,5 @@
 // Cities Array
 let cities = [];
-console.log(cities)
 
 // First time user if no local storage then show instruction text, if not pull from local storage
 if (localStorage.length === 0) {
@@ -8,11 +7,11 @@ if (localStorage.length === 0) {
     cardHead.text("Type City in Search Field!");
     $(".rightMainDiv").append(cardHead);
 } else {
-    let cityValue = cities[0]
+    let cityArray = JSON.parse(localStorage.getItem("cityNums"));
+    let cityValue = cityArray[0];
 
     searchCity(cityValue);
 };
-
 
 // On-click runs searchCity with cityValue entered in input field
 $("#search-button").on("click", function (event) {
@@ -22,32 +21,12 @@ $("#search-button").on("click", function (event) {
     $(".small-row").empty();
 
     let cityValue = $("#city-search").val().trim();
-
-
-    cities.push(cityValue)
-    localStorage.setItem("cityNums", cities);
+    // Pushes entry to cities array and then sets new array in local storage
+    cities.splice(0, 0, cityValue);
+    localStorage.setItem("cityNums", JSON.stringify(cities));
 
     searchCity(cityValue)
 });
-
-
-// Create city buttons
-function renderButtons() {
-    // Why do this?  Maybe pull from local storage every time?
-    $("buttons-view").empty();
-    
-    for (var i = 0; i < cities.length; i++) {
-
-    let cityButton = $("<button>")
-    let cityCap = cityValue.charAt(0).toUpperCase() + cityValue.slice(1)
-    cityButton.addClass("col-md-12 btn btn-light btn-outline-dark cityBtn");
-    cityButton.text(cityCap);
-    cityButton.attr("src", "button");
-    // cityButton.attr("id", "cityBtn");
-    // cityButton.attr("data-city", cityValue);
-    $("#cityBtnDiv").append(cityButton);
-    }
-};
 
 // On-click runs searhCity with cityValue from data attribute data-city
 function cityButtons() {
@@ -61,10 +40,29 @@ function cityButtons() {
     searchCity(cityValue)
 };
 
-// $(document).on("click", ".cityBtn", cityButtons);
-
-
+$(document).on("click", ".cityBtn", cityButtons);
 //Look at Week 4 Activity 23
+
+// Create city buttons
+function renderButtons() {
+    // Why do this?  Maybe pull from local storage every time?
+    $("buttons-view").empty();
+
+    let cityArray = JSON.parse(localStorage.getItem("cityNums"));
+
+    for (var i = 0; i < cityArray.length; i++) {
+
+        let cityButton = $("<button>")
+        let cityCap = cityArray[i].charAt(0).toUpperCase() + cityArray[i].slice(1)
+        cityButton.addClass("col-md-12 btn btn-light btn-outline-dark cityBtn");
+        cityButton.text(cityCap);
+        cityButton.attr("src", "button");
+        cityButton.attr("id", "cityBtn");
+        cityButton.attr("data-city", cityArray[i]);
+        $("#cityBtnDiv").append(cityButton);
+    }
+};
+renderButtons();
 
 function searchCity(cityValue) {
 
