@@ -7,28 +7,35 @@ if (localStorage.length === 0) {
     cardHead.text("Type City in Search Field!");
     $(".rightMainDiv").append(cardHead);
 } else {
+    // Return user will render city buttons
     let cityArray = JSON.parse(localStorage.getItem("cityNums"));
+    // Returning user will see last search populating page
     let cityValue = cityArray[0];
+
+    let citArr = JSON.parse(localStorage.getItem("cityNums"));
+    for (let i = 0; i < citArr.length; i++) {
+        cities.push(citArr[i]);
+    };
 
     searchCity(cityValue);
 };
 
-// On-click runs searchCity with cityValue entered in input field
+// Search City:  On-click runs searchCity with cityValue entered in input field
 $("#search-button").on("click", function (event) {
     event.preventDefault();
     $(".rightMainDiv").empty();
     $(".smallh3").empty();
     $(".small-row").empty();
-
+    
     let cityValue = $("#city-search").val().trim();
     // Pushes entry to cities array and then sets new array in local storage
     cities.splice(0, 0, cityValue);
     localStorage.setItem("cityNums", JSON.stringify(cities));
-
+    renderButtons();
     searchCity(cityValue)
 });
 
-// On-click runs searhCity with cityValue from data attribute data-city
+// Dynamic City Buttons:  On-click runs searhCity with cityValue from data attribute data-city
 function cityButtons() {
     event.preventDefault();
     $(".rightMainDiv").empty();
@@ -41,17 +48,14 @@ function cityButtons() {
 };
 
 $(document).on("click", ".cityBtn", cityButtons);
-//Look at Week 4 Activity 23
 
-// Create city buttons
+// Dynamic City Buttons:  Create the city buttons and display upon opening site
 function renderButtons() {
-    // Why do this?  Maybe pull from local storage every time?
-    $("buttons-view").empty();
-
+    $("#cityBtnDiv").empty();
+    // Pulls array from localStorage and renders buttons
     let cityArray = JSON.parse(localStorage.getItem("cityNums"));
 
     for (var i = 0; i < cityArray.length; i++) {
-
         let cityButton = $("<button>")
         let cityCap = cityArray[i].charAt(0).toUpperCase() + cityArray[i].slice(1)
         cityButton.addClass("col-md-12 btn btn-light btn-outline-dark cityBtn");
@@ -60,7 +64,7 @@ function renderButtons() {
         cityButton.attr("id", "cityBtn");
         cityButton.attr("data-city", cityArray[i]);
         $("#cityBtnDiv").append(cityButton);
-    }
+    };
 };
 renderButtons();
 
@@ -78,7 +82,6 @@ function searchCity(cityValue) {
 
         let latitude = response.coord.lat
         let longitude = response.coord.lon
-
         let queryURLLatLon = "https://api.openweathermap.org/data/2.5/onecall?lat=" + latitude + "&lon=" + longitude + "&exclude={part}&appid=" + APIKey;
 
         // Second AJAX to GET UV Index
@@ -176,9 +179,6 @@ function searchCity(cityValue) {
                 uvLow.text(response2.current.uvi);
                 $(".uvText").append(uvLow);
             }
-
-            // Calling the renderButtons function to display city buttons
-            // renderButtons();
 
             // Clear input field
             $("#city-search").val("");
